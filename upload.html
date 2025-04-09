@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subir Archivos</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Subida de Archivos</h1>
+    </header>
+    <main>
+      <div class="upload-container">
+        <h2>Sube los archivos necesarios</h2>
+
+        <div class="file-input">
+          <label for="empleados">📂 Cargar archivo de empleados</label>
+          <input type="file" id="empleados" accept=".xlsx,.xls" />
+        </div>
+
+        <div class="file-input">
+          <label for="registros">📂 Cargar archivo de registros</label>
+          <input type="file" id="registros" accept=".xlsx,.xls" />
+        </div>
+
+        <div class="tooltip-container">
+          <button
+            id="btnProcesarNomina"
+            class="btn"
+            disabled
+            onclick="procesarNomina()"
+          >
+            Procesar Nómina
+          </button>
+          <span class="tooltip-text" id="tooltipNomina"
+            >Sube ambos archivos para activar esta función</span
+          >
+        </div>
+        <p id="status"></p>
+      </div>
+    </main>
+    <div id="resultadoEmpleados"></div>
+    <div id="resultadoRegistros"></div>
+    <div id="resultadoNomina"></div>
+    <script src="assets/libs/xlsx.full.min.js"></script>
+    <script src="assets/js/fileHandler.js"></script>
+    <script src="assets/js/payrollCalculator.js"></script>
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>
