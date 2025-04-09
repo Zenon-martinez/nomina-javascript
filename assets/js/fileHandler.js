@@ -9,6 +9,21 @@ document.addEventListener("DOMContentLoaded", () => {
   if (registrosInput) {
     registrosInput.addEventListener("change", handleAttendanceFile);
   }
+
+  const empleados = localStorage.getItem("empleados");
+  const registros = localStorage.getItem("registros");
+
+  if (empleados) {
+    empleadosValidos = JSON.parse(empleados);
+    mostrarTablaResultados();
+    verificarEstadoBotonProcesar();
+  }
+
+  if (registros) {
+    registrosValidos = JSON.parse(registros);
+    mostrarRegistrosResultados();
+    verificarEstadoBotonProcesar();
+  }
 });
 
 const columnasObligatorias = [
@@ -25,6 +40,7 @@ let empleadosValidos = [];
 let empleadosInvalidos = [];
 let registrosValidos = [];
 let registrosInvalidos = [];
+const limiteRetardos = 3;
 
 /**
  * Maneja la carga del archivo y lo procesa.
@@ -70,7 +86,7 @@ function handleFileUpload(event) {
           });
         }
       });
-
+      localStorage.setItem("empleados", JSON.stringify(empleados));
       mostrarTablaResultados();
       verificarEstadoBotonProcesar();
     } catch (error) {
@@ -134,7 +150,7 @@ async function handleAttendanceFile(event) {
           registrosInvalidos.push({ ...row, fila: index + 2 });
         }
       });
-
+      localStorage.setItem("registros", JSON.stringify(jsonData));
       mostrarRegistrosResultados();
       verificarEstadoBotonProcesar();
     } catch (error) {
@@ -282,6 +298,7 @@ function procesarNomina() {
     let totalHorasExtra = 0;
     let totalRetardosMin = 0;
     let domingosTrabajados = 0;
+    let retardos = 0;
 
     registrosEmpleado.forEach((reg) => {
       const dia = reg["Día de la semana"];
@@ -314,7 +331,6 @@ function procesarNomina() {
         if (tiempoTrabajado >= 360) domingosTrabajados++;
       }
     });
-
     const sueldoBase = parseFloat(emp["Salario base"]);
     const horasNormales = 48; // de lunes a viernes 10h x 5d + 4h sábado
 
@@ -334,12 +350,15 @@ function procesarNomina() {
 
     // Deducciones
     const bloquesRetardo = esEspecial
-      ? Math.floor(totalRetardosMin / 30) * 0.5
+      ? Math.floor(totalRetardosMin / 30)
       : Math.floor(totalRetardosMin / 60);
-    const descuentoRetardo = bloquesRetardo * pagoPorHora * 2;
 
+    const faltas =
+      bloquesRetardo > 0 ? parseInt(bloquesRetardo / limiteRetardos) : 0;
+    const bloquesFaltas = faltas * pagoPorHora * 8;
+    const descuentoRetardo = (bloquesRetardo - faltas * 3) * pagoPorHora * 2;
     const totalBonificaciones = pagoHE + pagoDomingo;
-    const totalDeducciones = descuentoRetardo;
+    const totalDeducciones = bloquesFaltas + descuentoRetardo;
 
     const pagoTotal = sueldoBase + totalBonificaciones - totalDeducciones;
 
@@ -353,17 +372,16 @@ function procesarNomina() {
       "Domingos trabajados": domingosTrabajados,
       "Pago por HE": pagoHE.toFixed(2),
       "Descuento por retardo": descuentoRetardo.toFixed(2),
-      "Descuento por faltas": "0.00",
+      "Descuento por faltas": bloquesFaltas,
       "Pago por domingos": pagoDomingo.toFixed(2),
       "Total bonificaciones": totalBonificaciones.toFixed(2),
       "Total deducciones": totalDeducciones.toFixed(2),
       "Pago total semanal": pagoTotal.toFixed(2),
     };
   });
-  console.log("Nómina: ", nomina);
 
-  mostrarTabla(nomina);
-  //exportarExcel(resultado);
+  localStorage.setItem("resultadosNomina", JSON.stringify(nomina));
+  window.location.href = "results.html";
 }
 
 function parseTime(str) {
@@ -373,43 +391,4 @@ function parseTime(str) {
 
 function diffMin(start, end) {
   return (end - start) / (1000 * 60);
-}
-
-function mostrarTabla(data) {
-  const contenedor = document.getElementById("resultadoNomina");
-  contenedor.innerHTML = "";
-
-  const crearTabla = (titulo, datos) => {
-    const tabla = document.createElement("table");
-    tabla.classList.add("tabla-empleados");
-
-    const thead = document.createElement("thead");
-    const encabezados = Object.keys(datos[0]?.datos || datos[0] || {});
-    thead.innerHTML = `<tr>${encabezados
-      .map((col) => `<th>${col}</th>`)
-      .join("")}</tr>`;
-    tabla.appendChild(thead);
-
-    const tbody = document.createElement("tbody");
-    datos.forEach((reg) => {
-      const fila = document.createElement("tr");
-      const datosFila = reg.datos || reg;
-      encabezados.forEach((col) => {
-        const celda = document.createElement("td");
-        celda.textContent = datosFila[col] || "";
-        fila.appendChild(celda);
-      });
-      tbody.appendChild(fila);
-    });
-
-    tabla.appendChild(tbody);
-    const tituloTabla = document.createElement("h3");
-    tituloTabla.textContent = titulo;
-    contenedor.appendChild(tituloTabla);
-    contenedor.appendChild(tabla);
-  };
-
-  crearTabla("Nómina - Resultados", data);
-  localStorage.setItem("resultadosNomina", JSON.stringify(data));
-  window.location.href = "results.html";
 }
