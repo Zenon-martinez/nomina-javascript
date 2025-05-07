@@ -52,6 +52,7 @@ function exportarExcel() {
       "Sueldo base semanal",
       "Horas extra",
       "Retardos",
+      "Faltas",
       "Domingos trabajados",
       "Pago por HE",
       "Descuento por retardo",
@@ -73,14 +74,15 @@ function exportarExcel() {
       emp["Sueldo base semanal"],
       emp["Horas extra"],
       emp.Retardos,
+      emp.Faltas,
       emp["Domingos trabajados"],
       { f: `D${rowIndex}/${horasNormales}*E${rowIndex}*2` }, // Pago por HE
       { f: `D${rowIndex}/${horasNormales}*F${rowIndex}*2` }, // Descuento por retardo
-      { f: `D${rowIndex}/${horasNormales}*J${rowIndex}` }, // Descuento por faltas, se puede modificar a futuro
-      { f: `G${rowIndex}*(D${rowIndex}/${horasNormales}*6*2)` }, // Pago por domingos
-      { f: `H${rowIndex}+K${rowIndex}` }, // Total bonificaciones
-      { f: `I${rowIndex}+J${rowIndex}` }, // Total deducciones
-      { f: `D${rowIndex}+L${rowIndex}-M${rowIndex}` }, // Pago total semanal
+      { f: `D${rowIndex}/${horasNormales}*G${rowIndex}` }, // Descuento por faltas, se puede modificar a futuro
+      { f: `H${rowIndex}*(D${rowIndex}/${horasNormales}*6*2)` }, // Pago por domingos
+      { f: `I${rowIndex}+L${rowIndex}` }, // Total bonificaciones
+      { f: `J${rowIndex}+K${rowIndex}` }, // Total deducciones
+      { f: `D${rowIndex}+M${rowIndex}-N${rowIndex}` }, // Pago total semanal
     ]);
   });
 

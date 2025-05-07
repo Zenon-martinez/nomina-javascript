@@ -369,6 +369,7 @@ function procesarNomina() {
       "Sueldo base semanal": sueldoBase,
       "Horas extra": bloquesHE,
       Retardos: bloquesRetardo,
+      Faltas: faltas,
       "Domingos trabajados": domingosTrabajados,
       "Pago por HE": pagoHE.toFixed(2),
       "Descuento por retardo": descuentoRetardo.toFixed(2),
